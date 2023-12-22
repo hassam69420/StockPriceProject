@@ -1,0 +1,63 @@
+import pandas as pd
+import numpy as np
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style('whitegrid')
+plt.style.use("fivethirtyeight")
+%matplotlib inline
+
+# For reading stock data from yahoo
+from pandas_datareader.data import DataReader
+import yfinance as yf
+from pandas_datareader import data as pdr
+
+yf.pdr_override()
+
+# For time stamps
+from datetime import datetime
+# The tech stocks we'll use for this analysis
+tech_list = ['AAPL', 'GOOG', 'MSFT', 'AMZN']
+
+# Set up End and Start times for data grab
+tech_list = ['AAPL', 'GOOG', 'MSFT', 'AMZN']
+
+end = datetime.now()
+start = datetime(end.year - 1, end.month, end.day)
+
+for stock in tech_list:
+    globals()[stock] = yf.download(stock, start, end)
+
+company_list = [AAPL, GOOG, MSFT, AMZN]
+company_name = ["APPLE", "GOOGLE", "MICROSOFT", "AMAZON"]
+
+for company, com_name in zip(company_list, company_name):
+    company["company_name"] = com_name
+
+df = pd.concat(company_list, axis=0)
+
+def predict_high_low_prices_ema(stock_data, span=20):
+    stock_data['High_Predictions'] = stock_data['High'].ewm(span=span, adjust=False).mean().shift(-1)
+    stock_data['Low_Predictions'] = stock_data['Low'].ewm(span=span, adjust=False).mean().shift(-1)
+    return stock_data
+
+def plot_predictions(stock_data):
+    plt.figure(figsize=(12, 6))
+    plt.plot(stock_data['High'], label='Actual High Prices')
+    plt.plot(stock_data['High_Predictions'], label='Predicted High Prices')
+    plt.plot(stock_data['Low'], label='Actual Low Prices')
+    plt.plot(stock_data['Low_Predictions'], label='Predicted Low Prices')
+    plt.title('Stock Price Predictions using EMA')
+    plt.xlabel('Date')
+    plt.ylabel('Stock Price')
+    plt.legend()
+    plt.show()
+
+# Choose a stock from the tech list
+chosen_stock = AAPL
+
+# Apply predictions using EMA
+chosen_stock = predict_high_low_prices_ema(chosen_stock)
+
+# Plot predictions
+plot_predictions(chosen_stock)
